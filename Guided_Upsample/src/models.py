@@ -26,8 +26,9 @@ class BaseModel(nn.Module):
             else:
                 data = torch.load(self.gen_weights_path, map_location=lambda storage, loc: storage)
 
-            self.generator.load_state_dict(data['generator'])
-            self.iteration = data['iteration']
+            #self.generator.load_state_dict(data['generator'])
+            self.generator.load_state_dict(data)
+            self.iteration = 0 # data['iteration']
 
         # load discriminator only when training
         if (self.config.MODE == 1 or self.config.score) and os.path.exists(self.dis_weights_path):
@@ -58,7 +59,7 @@ class InpaintingModel(BaseModel):
 
         # generator input: [rgb(3) + edge(1)]
         # discriminator input: [rgb(3)]
-        
+
         if config.Generator==4:
             print("*******remove IN*******")
             generator = InpaintGenerator_5()
@@ -67,11 +68,11 @@ class InpaintingModel(BaseModel):
             discriminator = Discriminator(in_channels=3, use_sigmoid=config.GAN_LOSS != 'hinge')
         else:
             discriminator = Discriminator2(in_channels=3, use_sigmoid=config.GAN_LOSS != 'hinge')
-
+        """
         if len(config.GPU) > 1:
             generator = nn.DataParallel(generator, config.GPU)
             discriminator = nn.DataParallel(discriminator , config.GPU)
-
+        """
         l1_loss = nn.L1Loss()
         perceptual_loss = PerceptualLoss()
         style_loss = StyleLoss()
@@ -176,10 +177,8 @@ class InpaintingModel(BaseModel):
 
 
         if self.config.score:
-            gen_fake, _ =self.discriminator(outputs) 
+            gen_fake, _ =self.discriminator(outputs)
             gen_fake=gen_fake.view(8,-1)
             print(torch.mean(gen_fake,dim=1))
 
         return outputs
-
-    

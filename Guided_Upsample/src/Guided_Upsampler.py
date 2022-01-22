@@ -20,9 +20,9 @@ class Guided_Upsampler():
         self.debug = False
         self.model_name = model_name
 
-        self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
+        self.inpaint_model = InpaintingModel(config).cuda()
 
-        self.psnr = PSNR(255.0).to(config.DEVICE)
+        self.psnr = PSNR(255.0).cuda()
 
         # test mode
         if self.config.MODE == 2:
@@ -46,7 +46,7 @@ class Guided_Upsampler():
     def load(self):
 
         self.inpaint_model.load()
-        
+
     def save(self):
 
         self.inpaint_model.save()
@@ -199,9 +199,9 @@ class Guided_Upsampler():
         for items in test_loader:
 
             name = self.test_dataset.load_name(index)
-            
+
             print(name)
-            
+
             if self.config.same_face:
                 path = os.path.join(self.results_path, name)
             else:
@@ -292,6 +292,3 @@ class Guided_Upsampler():
         img = img * 255.0
         img = img.permute(0, 2, 3, 1)
         return img.int()
-
-
-
